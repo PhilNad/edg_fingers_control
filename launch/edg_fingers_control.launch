@@ -1,0 +1,7 @@
+<!-- USAGE: roslaunch edg_fingers_control edg_fingers_control.launch fingersTTY:=/dev/ttyACM0 -->
+<launch>
+	<arg name="fingersTTY" default="/dev/ttyACM0" />
+
+	<node pkg="edg_fingers_communication" type="edg_fingers_communication_node" name="serial_data_listener" output="screen" args="$(arg fingersTTY)" />
+	<node pkg="edg_fingers_control" type="edg_fingers_control_node" name="edg_fingers_control_server" output="screen" args="$(arg fingersTTY)" />
+</launch>

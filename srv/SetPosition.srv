@@ -1,0 +1,4 @@
+uint16 Motor1Position
+uint16 Motor2Position
+---
+bool Success
