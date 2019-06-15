@@ -28,7 +28,9 @@ bool transmitCommand(uint16_t requested_motor1_position, uint16_t requested_moto
 
     //The Arduino expect each integer to be made of 4 characters, this format
     //ensures that the width of the transmitted data respects this.
-    int result = fprintf(file_pointer, "1:%.4d 2:%.4d\n", requested_motor1_position, requested_motor2_position);
+    int result = 0;
+    if(file_pointer)
+      result = fprintf(file_pointer, "1:%.4d 2:%.4d\n", requested_motor1_position, requested_motor2_position);
 
     //Result should contain the number of bytes successfully written (14).
     if( result > 0){
@@ -64,6 +66,10 @@ int main(int argc, char **argv){
     // TTY being used. Most of the time, it is /dev/ttyACM0 but it can be mapped
     // to /dev/ttyACM1, for example, if the RObotiq 2f-140 gripper is plugged in
     // and is already using that file path.
+    if(argc != 2){
+      ROS_ERROR("The TTY path must be given as the sole argument.");
+      return 1;
+    }
     char* serialTtyPath = argv[1];
     file_pointer = fopen(serialTtyPath,"w");
 
@@ -92,7 +98,8 @@ int main(int argc, char **argv){
     }
 
     //Close the file before exiting the program.
-    fclose(file_pointer);
+    if(file_pointer)
+      fclose(file_pointer);
 
     return 0;
 }
