@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "ros/ros.h"
 #include <ros/callback_queue.h>
 #include "edg_fingers_control/SetPosition.h"
@@ -61,7 +62,21 @@ bool setPosition(   edg_fingers_control::SetPosition::Request  &req,
     return result;
 }
 
+//The serial communication with the Arduino board must be properly configured
+//before its going to be used. Its a fairly complex process that is done by
+//executing the following Linux commands.
+void configureTTY(char* ttyPath){
+    string command = "stty -F ";
+    command += ttyPath;
+    command += " cs8 115200 -ignbrk -ignpar -igncr -hupcl -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts";
+    system(command.c_str());
+    system("sleep 4");
+}
+
 int main(int argc, char **argv){
+    //Initialize the ROS node
+    ros::init(argc, argv, "edg_fingers_control_server");
+
     //The first argument of the service must represent the fil descriptor of the
     // TTY being used. Most of the time, it is /dev/ttyACM0 but it can be mapped
     // to /dev/ttyACM1, for example, if the RObotiq 2f-140 gripper is plugged in
@@ -71,10 +86,9 @@ int main(int argc, char **argv){
       return 1;
     }
     char* serialTtyPath = argv[1];
-    file_pointer = fopen(serialTtyPath,"w");
 
-    //Initialize the ROS node
-    ros::init(argc, argv, "edg_fingers_control_server");
+    configureTTY(serialTtyPath);
+    file_pointer = fopen(serialTtyPath,"wb");
 
     //Instantiate the handle, needs to be done after ros::init
     thisNode = new ros::NodeHandle();
